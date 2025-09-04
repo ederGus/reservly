@@ -1,0 +1,58 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: reservly-mongo
+    ports: ["27018:27017"]              # host:27018 -> container:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-express:
+    image: mongo-express:1
+    container_name: reservly-mongo-express
+    ports: ["8081:8081"]
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: rootpassword
+      ME_CONFIG_MONGODB_URL: mongodb://root:rootpassword@mongo:27017/
+    depends_on:
+      - mongo
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: reservly-rabbit
+    ports:
+      - "5673:5672"                   # host:5673 -> container:5672 (AMQP)
+      - "15673:15672"                 # host:15673 -> container:15672 (UI)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Redis UI
+  redis:
+    image: redis:7
+    container_name: reservly-redis
+    ports: ["6380:6379"]              # host:6380 -> container:6379
+  
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: reservly-redis-ui
+    ports:
+      - "8082:8081"                     # open http://localhost:8082
+    environment:
+      REDIS_HOSTS: "local:redis:6379"
+    depends_on:
+      - redis
+
+
+volumes:
+  mongo_data:
