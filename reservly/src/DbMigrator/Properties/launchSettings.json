@@ -1,0 +1,16 @@
+﻿{
+    "profiles": {
+        "DbMigrator Local": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Local"
+            }
+        },
+        "DbMigrator Develop": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "DOTNET_ENVIRONMENT": "Develop"
+            }
+        }
+    }
+}
